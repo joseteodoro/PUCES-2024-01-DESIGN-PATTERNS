@@ -36,3 +36,18 @@ Architectural patterns offer high-level strategies for organizing large-scale so
 
 [Architectural Patterns](arch-patterns.md)
 
+
+
+## References
+
+[patterns para js](https://www.patterns.dev/)
+
+[refactoring.guru](https://refactoring.guru/)
+
+[Source Making](https://sourcemaking.com/design_patterns/)
+
+[Improving the Design of Existing Code by Martin Fowler](https://martinfowler.com/books/refactoring.html)
+
+[GoF - Design patterns](https://www.amazon.com.br/Padr%C3%B5es-Projetos-Solu%C3%A7%C3%B5es-Reutiliz%C3%A1veis-Orientados/dp/8573076100)
+
+[Clean Code](https://www.amazon.com.br/dp/B001GSTOAM)
