@@ -6,6 +6,36 @@ Who am I [José Teodoro da Silva](https://www.linkedin.com/in/jteodorosilva/)
 
 Python, Java, Golang, Javascript
 
+## Tools
+
+Reuse, maintenance, readability, previsibility, brain loading, safe.
+
+All of that is created to be easier, and safer to code and build software.
+
+* dont touch function parameters;
+* Big O notation O(n.logn) comparison based. Rather do in place;
+
+* filter, map, reduce: keep ordering; ( new arrays / lists )
+
+## We choose the trade-off that matters most.
+
+```java
+// filling lazy fields changing the input parameters
+public void activeUsersInPlace(List<User> users) {}
+
+// immutable objects leading to huge memory consumtion
+public List<User> activeUsers(List<User> users) {}
+
+// fluent code, but not immutable with side effects
+User.withName("user name").withId(100).withPassword('batatinha').build();
+{
+    return this
+}
+
+```
+
+
+
 ## About concurrency
 
 Concurrency is crucial when studying design patterns because ignoring it can lead to subtle and devastating errors.  Without proper concurrency management, your applications may suffer from race conditions, deadlocks, or unpredictable performance.  Many design patterns inherently involve complex concurrency challenges; failing to address them will result in unreliable and potentially disastrous software.
@@ -35,7 +65,6 @@ Design patterns in object-oriented programming (OOP) provide reusable, time-test
 Architectural patterns offer high-level strategies for organizing large-scale software systems. They define fundamental structures and relationships between components, addressing concerns like scalability, performance, and modularity.  Examples include layered architecture, MVC (Model-View-Controller), and microservices. Understanding architectural patterns helps you make informed decisions about the overall structure of your application.
 
 [Architectural Patterns](arch-patterns.md)
-
 
 
 ## References
