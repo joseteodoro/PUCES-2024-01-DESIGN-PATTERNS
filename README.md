@@ -65,6 +65,18 @@ Architectural patterns offer high-level strategies for organizing large-scale so
 [Architectural Patterns](arch-patterns.md)
 
 
+## Others
+
+### Versionamento Semantico
+
+// nao surpreender os amiguinhos
+// honrar contratos
+v<break_change>.<add_or_change_feature>.<fix_bug>
+
+v8.0.0
+v8.100.99 // pra ca funciona
+v12.0.0 // nao funciona
+
 ## References
 
 [patterns para js](https://www.patterns.dev/)
