@@ -25,6 +25,166 @@ KISS, YAGNI, DRY, SOLID
 
 ## SOLID
 
+### SINGLE RESPONSABILITY PRINCIPLE
+
+```ts
+class FazTudo {
+    Save(us: User): Promise<bool> {
+        const update = 'insert into user (id, name, password) values (?,?,?)'
+        const db = Sqlite('./db.local');
+        return db.connect((connection) => {
+            connection.preparedStatement(update, { replacements : user})
+        })
+    }
+}
+
+class DBConnection {
+    ...
+}
+
+class Repository {
+    constructor(connection: DbConnection)
+    Save(us: User): Promise<bool> {
+        //const update = 'insert into user (id, name, password) values (?,?,?)'
+        const update = CONSTANTS.INSERT_USER
+        return connection.preparedStatement(update, { replacements : user})
+    }
+}
+```
+
+### OPEN / CLOSED
+
+```ts
+class Report {
+    build(): PDF {}
+}
+
+// agora queremos uma funcionalidade a mais
+class ReportPDFAndJSON {
+    buildPDF(): PDF {}
+    buildJSON(): object {}
+}
+
+/// seguindo Open/closed
+interface ReportBuilder {
+    build: (): ReportOutput
+}
+
+class PDFReport implements ReportBuilder {
+    build(): PDF {}
+}
+
+class JSONReport implements ReportBuilder {
+    build(): JSON {}
+}
+
+// agora eu quero exportar pra xls
+class XLSReport implements ReportBuilder {
+    build(): XLS {}
+}
+
+// design pattern
+class ReportFactory {
+    // esconder complexidade de criacao e promover abstracao
+    build(type: string = 'pdf'): ReportBuilder {
+        if (type === 'pdf') return new PDFReport()
+        if (type === 'JSON') return new JSONReport()
+        if (type === 'XLS') return new XLSReport()
+        return new Error()
+    }
+}
+```
+
+### LISKOV PRINCIPLE
+
+### INTERFACE SEGREGATION
+
+### DEPENDENCY INJECTION
 
 
 
+## Keep same granularity
+
+### In a function
+
+**Bad example of granularity:**
+
+```ts
+interface Order {
+  id: number;
+  amount: number;
+  status: "placed" | "canceled" | "shipped";
+}
+
+function generateOrderReport(orders: Order[]): { totalAmount: number; activeOrderCount: number } {
+  let totalAmount = 0;
+  let activeOrderCount = 0;
+
+  for (const order of orders) {
+    if (order.status !== "canceled") {
+      totalAmount += order.amount; // Summing total
+      activeOrderCount++;        // Counting active orders
+
+      console.log(`Order ${order.id} (Amount: ${order.amount}) is valid.`); // Report detail within the loop (bad practice)
+    } else {
+      console.log(`Order ${order.id} is canceled and removed.`); // Report detail within the loop (bad practice)
+    }
+  }
+
+  return { totalAmount, activeOrderCount };
+}
+
+// Example usage
+const orders: Order[] = [
+  { id: 1, amount: 50, status: "placed" },
+  { id: 2, amount: 100, status: "canceled" },
+  { id: 3, amount: 75, status: "placed" },
+];
+
+const report = generateOrderReport(orders);
+console.log(report);
+```
+
+**Good granularity**
+
+```ts
+interface Order {
+  id: number;
+  amount: number;
+  status: "placed" | "canceled" | "shipped";
+}
+
+function filterActiveOrders(orders: Order[]): Order[] {
+  return orders.filter(order => order.status !== "canceled");
+}
+
+function calculateTotalAmount(orders: Order[]): number {
+  return orders.reduce((total, order) => total + order.amount, 0);
+}
+
+function countActiveOrders(orders: Order[]): number {
+  return orders.length;
+}
+
+function generateOrderReport(orders: Order[]): { totalAmount: number; activeOrderCount: number } {
+  const activeOrders = filterActiveOrders(orders);
+  const totalAmount = calculateTotalAmount(activeOrders);
+  const activeOrderCount = countActiveOrders(activeOrders);
+
+  return { totalAmount, activeOrderCount };
+}
+
+// Example usage (unchanged)
+const orders: Order[] = [
+  { id: 1, amount: 50, status: "placed" },
+  { id: 2, amount: 100, status: "canceled" },
+  { id: 3, amount: 75, status: "placed" },
+];
+
+const report = generateOrderReport(orders);
+console.log(report);
+```
+
+### In a class
+
+### In a package
