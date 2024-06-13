@@ -97,11 +97,77 @@ class ReportFactory {
 
 ### LISKOV PRINCIPLE
 
+Honor the type (granted by OO and strongled typed languages)
+
+// user.login(string) -> boolean
+// guest.login(string) -> boolean
+// root.login(string) -> boolean
+
+js {}
+python {}
+
+// sem honrar o contrato nao tem abstracao nem polimorfimo
+
 ### INTERFACE SEGREGATION
+
+
+Keep the contract lean.
+
+```java
+class MyMouseListener implements MouseListener {
+  void	mouseClicked(MouseEvent e) {
+    // do nothing
+  }
+  void	mouseEntered(MouseEvent e) {
+    check if the pointer is over the rect
+  }
+  void	mouseExited(MouseEvent e) {
+    check if the pointer is over the rect
+  }
+  void	mousePressed(MouseEvent e) {
+  // do nothing
+  }
+  void	mouseReleased(MouseEvent e) {
+  // do nothing
+  }
+}
+
+interface MouseMoveListener {
+  void	mouseEntered(MouseEvent e)
+  void	mouseExited(MouseEvent e)
+}
+
+interface MouseClickListener {
+  void mouseClicked(MouseEvent e)
+}
+
+// compatibilidade temp
+interface MouseListener extends MouseMoveListener, MouseClickListener {
+  ...
+}
+
+MouseClickListener a = (p) -> //codigo do click
+
+```
 
 ### DEPENDENCY INJECTION
 
+Keep dependencies under contracts.
 
+```java
+class UserService{
+   private UserRepository repository;
+
+   public User load(String userId) {
+     return repository.load(userId)
+   }
+}
+```
+
+
+## Keep what changes separated
+
+// isole o que muda, daquilo que nao muda.
 
 ## Keep same granularity
 
