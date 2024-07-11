@@ -897,7 +897,6 @@ DataStore store = new Redis(new Database())
 
 ## Strategy | template method vs proxy vs adapter vs decorator
 
-
 // delegate
 this.doSomething()
 
@@ -932,4 +931,340 @@ strategy, template, adapter, decorator
 this.fazedorDeAlgo.facaAlgo()
 ```
 
+## Behavioral Patterns / Iterator | what about Generator?
+
+### Iterator
+
+```java
+   // old fashion C like for
+   List<FileContent> files = listFiles();
+   List<FileContent> processedFiles = List.of();
+   for (int i = 0; i < list.size(); i++) {
+      FileContent content = files.get(i);
+      doProcess(content);
+      processedFiles.add(content);
+   }
+
+   // using iterator
+   List<FileContent> files = listFiles();
+   Iterator<FileContent> it = files.iterator();
+   while (it.hasNext()) {
+      FileContent content = it.next();
+      pushToFTPServer(content);
+   }
+
+   // using foreach
+   List<FileContent> files = listFiles(); 
+   for (FileContent content : files) {
+      pushToFTPServer(content);
+   }
+
+   // using streams
+   listFiles()
+      .stream()
+      .map(pushToFTPServer); 
+```
+
+```js
+// eager list
+[].forEach() // itera na ordem da lista e sincrono, nao tem retorno
+[].map() // itera fora da ordem e assincrono, com retorno
+
+[].map(
+    item => {
+        // faz alguma coisa
+        // retorna um outro item
+    }
+}
+
+[].reduce // stream.grouping
+[].reduce( // itera na ordem da lista e sincrono, tem retorno
+    (acc, item) => {
+        acc
+        return acc;
+        // faz alguma coisa
+        // retorna um outro item
+    }, initial
+}
+```
+
+### Generator
+
+- economia de recurso pra executar grandes cargas on-demand
+
+```js
+    // on-demand list
+   function* generator() {
+      yield 1; // first call stops here
+      yield 2; // second call stops here
+      yield 3; // third call stops here
+      // end of generator (no more items)
+   }
+
+   const gen = generator(); // "Generator { }"
+
+   console.log(gen.next().value); // 1
+   console.log(gen.next().value); // 2
+   console.log(gen.next().value); // 3
+```
+
+
+```js
+   function* infinite() {
+      let index = 0;
+
+      while (true) {
+         yield index++; // each call stops here and return the index value before its increment!
+      }
+   }
+
+   const generator = infinite(); // "Generator { }"
+
+   console.log(generator.next().value); // 0
+   console.log(generator.next().value); // 1
+   console.log(generator.next().value); // 2
+
+    function* dbEntries(resultSet rs) {
+        let index = 0;
+        yield rs.next();
+   }
+```
+
+## Behavioral Patterns / Command
+
+Turns a request into a stand-alone object that contains all information about the request. This transformation lets you parameterize methods with different requests, delay or queue a request's execution, and support undoable operations;
+
+```js
+// using code as usual
+orderService.newOrder({
+   clientId: 1001,
+   items: [
+      {id: 1, quantity: 1, price: 1.1},
+      {id: 2, quantity: 1, price: 1.2},
+      {id: 25, quantity: 10, price: 1.2},
+      {id: 1023, quantity: 10, price: 0.3}
+   ]
+})
+
+// using commands
+const message = {
+   command: 'new-order',
+   params: {
+      clientId: 1001,
+      items: [
+         {id: 1, quantity: 1, price: 1.1},
+         {id: 2, quantity: 1, price: 1.2},
+         {id: 25, quantity: 10, price: 1.2},
+         {id: 1023, quantity: 10, price: 0.3}
+      ]
+   }
+}
+
+newOrderQueue.send(message);
+```
+
+### Usage
+
+Use the Command pattern when you want to parametrize objects with operations;
+
+Use the Command pattern when you want to queue operations, schedule their execution, or execute them remotely;
+
+Use the Command pattern when you want to implement reversible operations. Like a sequence of events and you final state is also a compilation of all those commands;
+
+```js
+const operations = [
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 1, action: 'debit', value: 100.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 10000.0, createdA: 1622139300108},
+   {user: 63, action: 'deposit', value: 120.0, createdA: 1622139300108},
+   {user: 34, action: 'withdraw', value: 130.0, createdA: 1622139300108},
+   {user: 85, action: 'deposit', value: 101.0, createdA: 1622139300108},
+   {user: 3, action: 'deposit', value: 110.0, createdA: 1622139300108},
+   {user: 2, action: 'deposit', value: 20.0, createdA: 1622139300108},
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 60, action: 'deposit', value: 5.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 12.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 150.0, createdA: 1622139300108}
+   {user: 1, action: 'snapshot', value: 50.0, createdA: 1622139300108}
+   {user: 1, action: 'withdraw', value: 150.0, createdA: 1622139300108}
+   {user: 1, action: 'deposit', value: 150.0, createdA: 1622139300108},
+]
+
+// we try to process and got an error!
+operations.push({user: 1, action: 'withdraw', value: 20.0, createdA: 1622139300108})
+
+//so, we add a compensation to fix the value
+operations.push({user: 1, action: 'deposit', value: 20.0, createdA: 1622139300108})
+
+// and then,
+const operations = [
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 10000.0, createdA: 1622139300108},
+   {user: 63, action: 'deposit', value: 120.0, createdA: 1622139300108},
+   {user: 34, action: 'withdraw', value: 130.0, createdA: 1622139300108},
+   {user: 85, action: 'deposit', value: 101.0, createdA: 1622139300108},
+   {user: 3, action: 'deposit', value: 110.0, createdA: 1622139300108},
+   {user: 2, action: 'deposit', value: 20.0, createdA: 1622139300108},
+   {user: 1, action: 'deposit', value: 100.0, createdA: 1622139300108},
+   {user: 60, action: 'deposit', value: 5.0, createdA: 1622139300108},
+   {user: 34, action: 'deposit', value: 12.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 150.0, createdA: 1622139300108},
+   {user: 1, action: 'withdraw', value: 17.46, createdA: 1622139300108}, //<-- error
+   {user: 1, action: 'deposit', value: 17.46, createdA: 1622139300108} //<--- compensation
+]
+
+// seems to be a document oriented nosql?
+```
+
+## SAGA
+
+Saga orquestrada;
+
+Saga coreografada;
+
+[saga explained](https://medium.com/@jteodoro/saga-para-transa%C3%A7%C3%B5es-distribu%C3%ADdas-em-micro-servi%C3%A7os-6b1467dccc91)
+
+[saga example](https://github.com/joseteodoro/saga-example-with-amqp)
+
 ## Chains of responsability
+
+- pass to next until someone answer
+
+```js
+// middleware nodejs
+
+const auth = (request, response, next) => {
+   return isValidUser(request.headers.Authorization)
+      ? next()
+      : response.write(401, "Unauthorized!");
+}
+
+const saveOrder = (request, response, next) => {
+   return Order.save(request.body)
+      .then(
+         (order) => response.write(201, order)
+      );
+}
+
+const endpoint = router.post(auth, saveOrder, ?);
+//middlewares e filters servlets
+```
+
+Command and CoR combined
+
+```js
+const messages = [
+   {
+      command: "create-user", 
+      payload: {name: 'user-01', email: '01@email.com'}
+   },
+   {
+      command: "disable-user",
+      payload: {name: 'user-99'}
+   },
+   {
+      command: "enable-user",
+      payload: {name: 'user-1001'}
+   },
+   {
+      command: "delete-user",
+      payload: {name: 'user-100'}
+   },
+]
+
+const drop = ({command, payload}, next) => {
+   if (command !== "delete-user") return next();
+   return UserModel.delete(payload.name);
+}
+
+const create = ({command, payload}, next) => {
+   if (command !== "create-user") return next();
+   return UserModel.save(payload);
+}
+
+const enable = ({command, payload}, next) => {
+   if (command !== "enable-user") return next();
+   return UserModel.enable(payload.name);
+}
+
+const disable = ({command, payload}, next) => {
+   if (command !== "disable-user") return next();
+   return UserModel.disable(payload.name);
+}
+
+const process = (message) => {
+   return stack(
+      drop,
+      create,
+      enable,
+      disable,
+      ok
+   );
+}
+// send each message to be processed
+messages.map(msg => process(msg));
+
+stack(
+    criarConta
+    // operacoes comuns
+    Deposito
+    Saque
+    // operacoes
+    Saldo // terminador
+)
+
+```
+
+what about reuse filters?
+
+```js
+const processPay = (message) => {
+   return stack(
+      userExists,
+      hasBalance,
+      pay
+   );
+}
+
+const processWithdraw = (message) => {
+   return stack(
+      userExists,
+      hasBalance,
+      withdraw
+   );
+}
+```
+
+## Creational Patterns / Object pool
+
+// reuso de recursos escassos
+
+pool conexoes de db
+postgres (400 conexoes simultaneas)
+10 instancias (40)
+
+pool: [*db1, db2, db3, ..., *dbn]
+pool: [android1, android2, iphone1, ..., *dbn]
+
+pool.get()
+pool.dispose(android)
+
+{
+    min: 10,
+    max: 20,
+    maxIdle: 120 segundos,
+}
+
+pool.get() // se nao tem ninguem disponivel
+
+// hikari
+// entity framework
+// postgres (pgbouncer)
+
+## Creational Patterns / Prototype
+
+
+## Structural Patterns / Flyweight
+
+
+## Prototype vs Flyweight vs Object Pool
