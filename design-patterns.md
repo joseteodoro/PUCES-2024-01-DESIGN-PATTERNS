@@ -1263,8 +1263,167 @@ pool.get() // se nao tem ninguem disponivel
 
 ## Creational Patterns / Prototype
 
+// economia de recursos (recursos custosos pra se carregar), na criacao dos objetos
+// arquivo grande que é lido pra um array, por exemplo, imagem de perfil.
+
+```java
+    // recursos custosos de se carregar, copia-da memoria
+    ProfilePhoto pf = OS.loadFromDisk("filepath.img")
+    User us = // User, Guest, Admin, Root extends User
+    us.setPhoto(pf);
+
+    // gerar clones pra garantir isolamento durante chamadas concorrentes
+    List<Order> orders = List.of(....);
+
+    // garantir que esse usuario nao tenha race condition
+    orders.stream().forEach(order -> us.buy(order)); // ordenado e espera cada item
+    orders.stream().map(order -> us.clone().buy(order)); // ordenado e nao espera cada item, processa concorrente
+
+    // o que acontece por baixo dos panos
+    order -> us.clone().buy(order1)
+    order -> us.clone().buy(order2)
+    order -> us.clone().buy(order3)
+    order -> us.clone().buy(order4)
+
+
+    // shallow copy
+        User {
+            // copia a referencia
+            List<Login> history;
+            String name;
+            // int, String, bool (copiados por valor)
+
+            public User clone() {
+                User us = new User()
+                us.history = this.history; // copia de referencia
+                us.name = this.name; // copia de valor
+            }
+        }
+
+    // deep copy
+        User {
+            // copia a referencia
+            List<Login> history;
+            String name;
+            // int, String, bool (copiados por valor)
+
+            public User clone() {
+                User us = new User()
+                // duplicar na memoria
+                us.history = new List<>(this.history); // copia para uma nova referencia
+                us.name = this.name; // copia de valor
+            }
+        }
+
+```
+
+// com nodejs
+
+```js
+function doSomething(arr) {
+    const copy = [...arr]
+}
+
+```
 
 ## Structural Patterns / Flyweight
 
+// econimizar recurso (memoria e processador), usando a mesma referencia de objetos grandes
+
+```java
+    // recursos custosos de se carregar, copia-da memoria
+    CompanyLogo pf = OS.loadFromDisk("filepath.img")
+    User us = // User, Guest, Admin, Root extends User
+    us.setPhoto(pf);
+
+    new User().setphoto(pf);
+
+    // shallow copy
+        User {
+            // flyweith sempre copia referencia
+            // tem que ser somente leitura
+            byte[] logo = ...;
+
+            // copia a referencia
+            List<Login> history;
+            String name;
+            // int, String, bool (copiados por valor)
+
+            public User clone() {
+                User us = new User()
+                us.history = this.history; // copia de referencia
+                us.name = this.name; // copia de valor
+            }
+
+            public setLogo(byte [] newOne) {
+                // copy bytes to the old array
+                // replace data everywhere
+                newOne.copy(this.logo, 0, this.logo.length)
+            }
+        }
+
+    // deep copy
+        User {
+            // copia a referencia
+            List<Login> history;
+            String name;
+            // int, String, bool (copiados por valor)
+
+            public User clone() {
+                User us = new User()
+                // duplicar na memoria
+                us.history = new List<>(this.history); // copia para uma nova referencia
+                us.name = this.name; // copia de valor
+            }
+        }
+
+```
+
+
+```java
+public class PrototyperRegister {
+
+    public PrototyperRegister getIntance() {}
+
+    // custoso em memoria
+    Map<String, byte[]> logos;
+
+    public byte [] byCompany(String filename){
+        if (!logos.hasKey(filename)) {
+            logos.put(filename, OS.loadFromFile(filename))
+        }
+        return logos.get(filename)
+    }
+}
+
+// 
+user.setCompanyLogo(PrototyperRegister.getInstance().byCompany(filename))
+
+```
 
 ## Prototype vs Flyweight vs Object Pool
+
+prototype a intencao é economizar na carga do objecto (copia os objetos)
+flyweigth a intencao é economizar memoria (reusa os objetos)
+object pool a intencao é garantir um objeto seja reutilizado, um cliente por vez
+
+## Structural Patterns / Bridge
+
+SPI (specification program interface) v<major>.<minor>.<bugfix>
+jdbc (interfaces e classes abstratas) = gerante o contrato // um grupo trabalhando aqui
+
+API (application program interface)
+OracleJdbc // evolui mais rapido v<major>.<minor>.<bugfix>
+PostgresJdbc // evolui mais rapido v<major>.<minor>.<bugfix>
+
+oracle:
+    jdbc v4.5.1
+    jdbc v4.5.3
+    jdbc v5.0.0 // quebra compatibilidade
+
+// sql nao é igual,
+// tem features especificas de cada conector
+
+## Structural Patterns / Facade
+
+
